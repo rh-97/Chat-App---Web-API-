@@ -50,3 +50,8 @@ D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\Microsoft.IdentityModel.Protoc
 D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
 D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
 D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\System.Security.Permissions.dll
+D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\AutoMapper.dll
+D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\FluentValidation.dll
+D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\FluentValidation.AspNetCore.dll
+D:\Projects\Learnathon\Test\Test\bin\Debug\net6.0\FluentValidation.DependencyInjectionExtensions.dll

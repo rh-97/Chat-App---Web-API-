@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Test.Models;
 
-public class User
+public class User : IUser
 {
 
     [BsonId]

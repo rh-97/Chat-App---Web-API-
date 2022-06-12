@@ -2,6 +2,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Test.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Reflection;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,8 +29,14 @@ builder.Services.AddAuthentication(x =>
     };
 });
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+//builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddControllersWithViews();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddFluentValidation(c => c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
+
+
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

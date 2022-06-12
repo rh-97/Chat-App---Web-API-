@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,10 +21,12 @@ public class UserController : ControllerBase
 
     UserService service;
     private string key;
-    public UserController (UserService service, IConfiguration configuration)
+    IMapper mapper;
+    public UserController (UserService service, IConfiguration configuration, IMapper _mapper)
     {
         this.service = service;
         this.key = configuration.GetSection("JwtKey").ToString();
+        this.mapper = _mapper;
     }
 
 
@@ -35,6 +38,8 @@ public class UserController : ControllerBase
         var users = await service.Fetch(itemsPerPage, pageNumber);
         return Ok(users);
     }
+
+
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]
@@ -51,21 +56,30 @@ public class UserController : ControllerBase
         }
     }
 
+
+
     // POST api/<UserController>
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] User user)
+    public async Task<IActionResult> Post([FromBody] UserRegister user)
     {
-        await service.Register(user);
+        User user1 = mapper.Map<User>(user);
+        await service.Register(user1);
 
-        return CreatedAtAction(nameof(Get), new { id = user.Id }, user);
+        return CreatedAtAction(nameof(Get), new { id = user1.Id }, user1);
     }
 
-    //// PUT api/<UserController>/5
-    //[HttpPut("{id}")]
-    //public void Put(int id, [FromBody] string value)
-    //{
-    //}
+
+
+    // PUT api/<UserController>/5
+    [HttpPut("{id}")]
+    public void Put(int id, [FromBody] string value)
+    {
+
+    }
+
+
+
 
     // DELETE api/<UserController>/5
     [HttpDelete("{id}")]
@@ -81,6 +95,9 @@ public class UserController : ControllerBase
             return Ok(res);
         }
     }
+
+
+
 
     [AllowAnonymous]
     [HttpPost("login")]
