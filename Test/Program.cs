@@ -56,11 +56,11 @@ if (app.Environment.IsDevelopment())
 app.UseCors(policy =>
 {
     policy
-    .SetIsOriginAllowed(_ => true)
+    .WithOrigins("http://localhost:4200")
+    .SetIsOriginAllowed(origin => true)
     .AllowAnyOrigin()
     .AllowAnyHeader()
-    .AllowAnyMethod()
-    .AllowCredentials();
+    .AllowAnyMethod();
 });
 
 app.UseAuthentication();
