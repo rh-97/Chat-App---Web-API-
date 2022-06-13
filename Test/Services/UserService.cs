@@ -26,7 +26,7 @@ namespace Test.Services
 
 
         // Register New User
-        public async Task Register(User user)
+        public async Task<int> Register(User user)
         {
             var filter = (Builders<User>.Filter.Eq<string>("Name", user.Name) | 
                           Builders<User>.Filter.Eq<string>("Email", user.Email));
@@ -35,14 +35,16 @@ namespace Test.Services
 
             if (user0 == null)
             {
+                bool success = false;
                 user.Password = GenerateHash(user.Password);
-                await collection.InsertOneAsync(user);
+                await collection.InsertOneAsync(user).ContinueWith(r => success = r.IsCompletedSuccessfully);
+                return (success ? 1 : -1);
             }
             else
             {
-                throw new Exception("User already exists.");
+                return 0;
             }
-            return;
+
         }
 
 
