@@ -17,7 +17,6 @@ namespace Test.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-[DisableCors]
 public class UserController : ControllerBase
 {
 

@@ -5,23 +5,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: MyAllowSpecificOrigins,
-                      policy =>
-                      {
-                          policy
-                          .AllowAnyOrigin()
-                          .AllowAnyHeader()
-                          .AllowAnyMethod();
-                      });
-});
 
 
 builder.Services.Configure<Test.Database.DatabaseSettings>(builder.Configuration.GetSection("DatabaseInfo"));
@@ -65,7 +53,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors(MyAllowSpecificOrigins);
+app.UseCors(policy =>
+{
+    policy
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .AllowCredentials();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();
