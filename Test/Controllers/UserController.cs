@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -16,6 +17,7 @@ namespace Test.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
+[DisableCors]
 public class UserController : ControllerBase
 {
 
