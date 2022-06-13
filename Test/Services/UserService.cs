@@ -26,25 +26,10 @@ namespace Test.Services
 
 
         // Register New User
-        public async Task<int> Register(User user)
+        public async Task<bool> Register(User user)
         {
-            var filter = (Builders<User>.Filter.Eq<string>("Name", user.Name) | 
-                          Builders<User>.Filter.Eq<string>("Email", user.Email));
-
-            User? user0 = collection.Find(filter).FirstOrDefault();
-
-            if (user0 == null)
-            {
-                bool success = false;
-                user.Password = GenerateHash(user.Password);
-                await collection.InsertOneAsync(user).ContinueWith(r => success = r.IsCompletedSuccessfully);
-                return (success ? 1 : -1);
-            }
-            else
-            {
-                return 0;
-            }
-
+            user.Password = GenerateHash(user.Password);
+            return await collection.InsertOneAsync(user).ContinueWith(r => r.IsCompletedSuccessfully);
         }
 
 
@@ -101,9 +86,36 @@ namespace Test.Services
         }
 
 
+        // Check username is unique or not
+        public async Task<bool> IsUniqueUsername(string name)
+        {
+            var filter = Builders<User>.Filter.Eq<string>("Name", name);
+            var user = await collection.FindAsync(filter);
+            if (user != null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
 
-
+        // Check username is unique or not
+        public async Task<bool> IsUniqueEmail(string email)
+        {
+            var filter = Builders<User>.Filter.Eq<string>("Email", email);
+            var user = await collection.FindAsync(filter);
+            if (user != null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
         // A helper function to generate password hash
         private string GenerateHash(string password)

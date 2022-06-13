@@ -65,13 +65,9 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Post([FromBody] UserRegister user)
     {
         User user1 = mapper.Map<User>(user);
-        int res = await service.Register(user1);
+        bool res = await service.Register(user1);
 
-        if (res == 0)
-        {
-            return BadRequest("User already exists.");
-        } 
-        else if (res == -1)
+        if (res == false)
         {
             return BadRequest("Unknown error occured.");
         }

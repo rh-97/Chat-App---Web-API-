@@ -1,12 +1,17 @@
 ﻿using FluentValidation;
+using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 using System.Text.RegularExpressions;
+using Test.Database;
 using Test.Models;
+using Test.Services;
 
 namespace Test.Validators;
 
 public class UserRegisterValidator : AbstractValidator<UserRegister>
 {
-    public UserRegisterValidator()
+
+    public UserRegisterValidator(UserService service)
     {
 
         // Username starts with a letter and
@@ -17,10 +22,24 @@ public class UserRegisterValidator : AbstractValidator<UserRegister>
             .WithMessage("Invalid Name");
 
 
+        // Username must be unique
+        RuleFor(u => u.Name)
+            .Must(name => service.IsUniqueUsername(name).Result)
+            .WithMessage("Username already exists.");
+
+
+
         // Email is a valid email address
         RuleFor(u => u.Email)
             .EmailAddress()
             .WithMessage("Invalid Email");
+
+
+        // Email must be unique
+        RuleFor(u => u.Email)
+            .Must(email => service.IsUniqueEmail(email).Result)
+            .WithMessage("Email already exists.");
+
 
 
         // Age is at least 18 years
