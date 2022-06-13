@@ -29,15 +29,28 @@ namespace Test.Services
         public async Task<bool> Register(User user)
         {
             user.Password = GenerateHash(user.Password);
-            return await collection.InsertOneAsync(user).ContinueWith(r => r.IsCompletedSuccessfully);
+            return await collection.InsertOneAsync(user)
+                .ContinueWith(r => r.IsCompletedSuccessfully);
         }
 
 
 
         // Get a list of users for a given page number and number of users per page
-        public async Task<List<User>> Fetch(int itemsPerPage = 15, int pageNumber = 1)
+        public async Task<List<UserGet>> Fetch(int itemsPerPage = 15, int pageNumber = 1)
         {
-            return await collection.Find(_ => true).Skip((pageNumber-1)*itemsPerPage).Limit(itemsPerPage).ToListAsync();
+            var projection = Builders<User>.Projection.Expression(p => new UserGet
+            {
+                Id = p.Id.ToString(),
+                Name = p.Name,
+                Email = p.Email,
+                DateOfBirth = p.DateOfBirth
+            });
+
+            return await collection.Find(_ => true)
+                .Project(projection)
+                .Skip((pageNumber-1)*itemsPerPage)
+                .Limit(itemsPerPage)
+                .ToListAsync();
         }
 
 
