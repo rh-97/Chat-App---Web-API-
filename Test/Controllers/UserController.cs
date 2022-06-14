@@ -115,7 +115,7 @@ public class UserController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<string>> Login(UserLogin user)
+    public async Task<ActionResult<Object>> Login(UserLogin user)
     {
         var registered = await service.VerifyLogin(user);
         if (registered == true)
@@ -137,7 +137,7 @@ public class UserController : ControllerBase
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(tokenHandler.WriteToken(token));
+            return Ok(new { token = tokenHandler.WriteToken(token) });
         }
         else
         {
