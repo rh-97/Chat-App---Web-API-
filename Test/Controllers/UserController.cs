@@ -44,9 +44,9 @@ public class UserController : ControllerBase
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<User>> Get(string id)
+    public async Task<ActionResult<UserGet>> Get(string id)
     {
-        User? user = await service.FetchById(id);
+        UserGet? user = await service.FetchById(id);
         if (user == null) 
         { 
             return BadRequest("User Does not exist");
@@ -77,11 +77,19 @@ public class UserController : ControllerBase
 
 
 
-    // PUT api/<UserController>/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    // PUT api/<UserController>/
+    [HttpPut("[action]")]
+    public async Task<IActionResult> Update([FromBody] UserUpdate userUpdate)
     {
-
+        bool isSuccessful = await service.Update(userUpdate);
+        if (isSuccessful == false)
+        {
+            return BadRequest("Update operation failed.");
+        }
+        else
+        {
+            return Ok("Successfully updated.");
+        }
     }
 
 

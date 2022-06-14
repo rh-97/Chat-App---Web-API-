@@ -56,10 +56,17 @@ namespace Test.Services
 
 
         // Get all the info for a specific user identified by Id
-        public async Task<User> FetchById(string Id)
+        public async Task<UserGet> FetchById(string Id)
         {
+            var projection = Builders<User>.Projection.Expression(p => new UserGet
+            {
+                Id = p.Id.ToString(),
+                Name = p.Name,
+                Email = p.Email,
+                DateOfBirth = p.DateOfBirth
+            });
             var filter = Builders<User>.Filter.Eq<string>("Id", Id);
-            return await collection.Find(filter).FirstOrDefaultAsync();
+            return await collection.Find(filter).Project(projection).FirstOrDefaultAsync();
         }
 
 
@@ -93,17 +100,23 @@ namespace Test.Services
 
 
         // Update a specific user data 
-        public async Task<User> Update(User user)
+        public async Task<bool> Update(UserUpdate user)
         {
-            return user;
+            var update = Builders<User>.Update
+                .Set("Email", user.Email)
+                .Set("DateOfBirth", user.DateOfBirth);
+
+            var res = await collection.UpdateOneAsync(u => u.Id == user.Id, update);
+
+            return res.IsAcknowledged;
         }
 
 
-        // Check username is unique or not
+        // Check username is unique or not for register
         public async Task<bool> IsUniqueUsername(string name)
         {
             var filter = Builders<User>.Filter.Eq<string>("Name", name);
-            var user = await collection.FindAsync(filter);
+            var user = await collection.Find(filter).FirstOrDefaultAsync();
             if (user != null)
             {
                 return false;
@@ -115,11 +128,11 @@ namespace Test.Services
         }
 
 
-        // Check username is unique or not
+        // Check email is unique or not for register
         public async Task<bool> IsUniqueEmail(string email)
         {
             var filter = Builders<User>.Filter.Eq<string>("Email", email);
-            var user = await collection.FindAsync(filter);
+            var user = await collection.Find(filter).FirstOrDefaultAsync();
             if (user != null)
             {
                 return false;
@@ -129,6 +142,29 @@ namespace Test.Services
                 return true;
             }
         }
+
+
+        // Check email is unique or not for register
+        public async Task<bool> IsUniqueEmailForUpdate(UserUpdate userUpdate)
+        {
+            var filter = (Builders<User>.Filter.Ne<string>("Id", userUpdate.Id) &
+                        Builders<User>.Filter.Eq<string>("Email", userUpdate.Email));
+            //u => (u.Id != userUpdate.Id && u.Email == userUpdate.Email)
+
+            var user = await collection.Find(filter)
+                .FirstOrDefaultAsync();
+            
+            if (user != null)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+
 
         // A helper function to generate password hash
         private string GenerateHash(string password)
