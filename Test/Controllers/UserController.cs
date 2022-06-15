@@ -84,11 +84,11 @@ public class UserController : ControllerBase
         bool isSuccessful = await service.Update(userUpdate);
         if (isSuccessful == false)
         {
-            return BadRequest("Update operation failed.");
+            return BadRequest(new { message = "Update operation failed." });
         }
         else
         {
-            return Ok("Successfully updated.");
+            return Ok(new { message = "Successfully updated." });
         }
     }
 
