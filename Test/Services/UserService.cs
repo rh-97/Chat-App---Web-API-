@@ -5,13 +5,14 @@ using MongoDB.Driver.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Test.Database;
+using Test.Helpers;
 using Test.Models;
 
 namespace Test.Services
 {
     public class UserService
     {
-        private readonly IMongoCollection<User> collection;
+        private readonly IMongoCollection<User> _usersCollection;
 
 
         public UserService(IOptions<DatabaseSettings> _dbsettings)
@@ -20,7 +21,7 @@ namespace Test.Services
             settings.ServerApi = new ServerApi(ServerApiVersion.V1);
             var client = new MongoClient(settings);
             var db = client.GetDatabase(_dbsettings.Value.DatabaseName);
-            collection = db.GetCollection<User>(_dbsettings.Value.CollectionName);
+            _usersCollection = db.GetCollection<User>(_dbsettings.Value.CollectionName[0]);
         }
 
 
@@ -28,8 +29,8 @@ namespace Test.Services
         // Register New User
         public async Task<bool> Register(User user)
         {
-            user.Password = GenerateHash(user.Password);
-            return await collection.InsertOneAsync(user)
+            user.Password = UserHelpers.GenerateHash(user.Password);
+            return await _usersCollection.InsertOneAsync(user)
                 .ContinueWith(r => r.IsCompletedSuccessfully);
         }
 
@@ -46,7 +47,7 @@ namespace Test.Services
                 DateOfBirth = p.DateOfBirth
             });
 
-            return await collection.Find(_ => true)
+            return await _usersCollection.Find(_ => true)
                 .Project(projection)
                 .Skip((pageNumber-1)*itemsPerPage)
                 .Limit(itemsPerPage)
@@ -66,25 +67,7 @@ namespace Test.Services
                 DateOfBirth = p.DateOfBirth
             });
             var filter = Builders<User>.Filter.Eq<string>("Id", Id);
-            return await collection.Find(filter).Project(projection).FirstOrDefaultAsync();
-        }
-
-
-        // Verify login credentials(username & password
-        public async Task<bool> VerifyLogin(UserLogin user)
-        {
-            var filter = (Builders<User>.Filter.Eq<string>("Name", user.Name) & 
-                           Builders<User>.Filter.Eq<string>("Password", GenerateHash(user.Password)));
-            var res = await collection.Find(filter).FirstOrDefaultAsync();
-
-            if (res == null)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return await _usersCollection.Find(filter).Project(projection).FirstOrDefaultAsync();
         }
 
 
@@ -93,7 +76,7 @@ namespace Test.Services
         public async Task<DeleteResult> Remove(string Id)
         {
             var filter = Builders<User>.Filter.Eq<string>("Id", Id);
-            var res = await collection.DeleteOneAsync(filter);
+            var res = await _usersCollection.DeleteOneAsync(filter);
             return res;
         }
 
@@ -106,7 +89,7 @@ namespace Test.Services
                 .Set("Email", user.Email)
                 .Set("DateOfBirth", user.DateOfBirth);
 
-            var res = await collection.UpdateOneAsync(u => u.Id == user.Id, update);
+            var res = await _usersCollection.UpdateOneAsync(u => u.Id == user.Id, update);
 
             return res.IsAcknowledged;
         }
@@ -116,7 +99,7 @@ namespace Test.Services
         public async Task<bool> IsUniqueUsername(string name)
         {
             var filter = Builders<User>.Filter.Eq<string>("Name", name);
-            var user = await collection.Find(filter).FirstOrDefaultAsync();
+            var user = await _usersCollection.Find(filter).FirstOrDefaultAsync();
             if (user != null)
             {
                 return false;
@@ -132,7 +115,7 @@ namespace Test.Services
         public async Task<bool> IsUniqueEmail(string email)
         {
             var filter = Builders<User>.Filter.Eq<string>("Email", email);
-            var user = await collection.Find(filter).FirstOrDefaultAsync();
+            var user = await _usersCollection.Find(filter).FirstOrDefaultAsync();
             if (user != null)
             {
                 return false;
@@ -151,7 +134,7 @@ namespace Test.Services
                         Builders<User>.Filter.Eq<string>("Email", userUpdate.Email));
             //u => (u.Id != userUpdate.Id && u.Email == userUpdate.Email)
 
-            var user = await collection.Find(filter)
+            var user = await _usersCollection.Find(filter)
                 .FirstOrDefaultAsync();
             
             if (user != null)
@@ -163,18 +146,6 @@ namespace Test.Services
                 return true;
             }
         }
-
-
-
-        // A helper function to generate password hash
-        private string GenerateHash(string password)
-        {
-            var hmac = new HMACSHA256(Encoding.UTF8.GetBytes("Learnathon"));
-            var temp = Encoding.UTF8.GetBytes(password);
-            var hash = hmac.ComputeHash(temp);
-            return BitConverter.ToString(hash, 0, hash.Length).Replace("-", String.Empty);
-        }
-
        
     }
 }

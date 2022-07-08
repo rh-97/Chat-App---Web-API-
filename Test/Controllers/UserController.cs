@@ -1,12 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 using Test.Models;
 using Test.Services;
 
@@ -20,23 +15,25 @@ namespace Test.Controllers;
 public class UserController : ControllerBase
 {
 
-    UserService service;
-    private string key;
-    IMapper mapper;
-    public UserController (UserService service, IConfiguration configuration, IMapper _mapper)
+    UserService _userService;
+    TokenService _tokenService;
+    private readonly string _key;
+    IMapper _mapper;
+    public UserController (UserService userService, IConfiguration configuration, IMapper mapper, TokenService tokenService)
     {
-        this.service = service;
-        this.key = configuration.GetSection("JwtKey").ToString();
-        this.mapper = _mapper;
+        _key = configuration.GetSection("JwtKey").ToString();
+        _mapper = mapper;
+        _userService = userService;
+        _tokenService = tokenService;
     }
 
 
 
     // GET: api/<UserController>
-    [HttpGet("{pageNumber}/{itemsPerPage}")]
+    [HttpGet("list/{pageNumber}/{itemsPerPage}")]
     public async Task<ActionResult<List<User>>> Get(int pageNumber = 1, int itemsPerPage = 15)
     {
-        var users = await service.Fetch(itemsPerPage, pageNumber);
+        var users = await _userService.Fetch(itemsPerPage, pageNumber);
         return Ok(users);
     }
 
@@ -46,7 +43,7 @@ public class UserController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserGet>> Get(string id)
     {
-        UserGet? user = await service.FetchById(id);
+        UserGet? user = await _userService.FetchById(id);
         if (user == null) 
         { 
             return BadRequest("User Does not exist");
@@ -61,11 +58,11 @@ public class UserController : ControllerBase
 
     // POST api/<UserController>
     [AllowAnonymous]
-    [HttpPost]
-    public async Task<IActionResult> Post([FromBody] UserRegister user)
+    [HttpPost("[action]")]
+    public async Task<IActionResult> Register([FromBody] UserRegister user)
     {
-        User user1 = mapper.Map<User>(user);
-        bool res = await service.Register(user1);
+        User user1 = _mapper.Map<User>(user);
+        bool res = await _userService.Register(user1);
 
         if (res == false)
         {
@@ -81,7 +78,7 @@ public class UserController : ControllerBase
     [HttpPut("[action]")]
     public async Task<IActionResult> Update([FromBody] UserUpdate userUpdate)
     {
-        bool isSuccessful = await service.Update(userUpdate);
+        bool isSuccessful = await _userService.Update(userUpdate);
         if (isSuccessful == false)
         {
             return BadRequest(new { message = "Update operation failed." });
@@ -96,10 +93,10 @@ public class UserController : ControllerBase
 
 
     // DELETE api/<UserController>/5
-    [HttpDelete("{id}")]
+    [HttpDelete("[action]/{id}")]
     public async Task<IActionResult> Delete([FromRoute] string id)
     {
-        var res = await service.Remove(id);
+        var res = await _userService.Remove(id);
         if (res.DeletedCount == 0)
         {
             return BadRequest("The deletion was not performed.");
@@ -107,41 +104,6 @@ public class UserController : ControllerBase
         else
         {
             return Ok(res);
-        }
-    }
-
-
-
-
-    [AllowAnonymous]
-    [HttpPost("login")]
-    public async Task<ActionResult<Object>> Login(UserLogin user)
-    {
-        var registered = await service.VerifyLogin(user);
-        if (registered == true)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenKey = Encoding.UTF8.GetBytes(this.key);
-
-            var tokenDescriptor = new SecurityTokenDescriptor()
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.Name, user.Name)
-                }),
-                Expires = DateTime.UtcNow.AddHours(1),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(tokenKey),
-                    SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-
-            return Ok(new { token = tokenHandler.WriteToken(token) });
-        }
-        else
-        {
-            return Unauthorized("Not registered");
         }
     }
 
