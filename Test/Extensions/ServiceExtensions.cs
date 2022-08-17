@@ -12,7 +12,7 @@ public static class ServiceExtensions
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(
-                policy => policy.AllowAnyOrigin()
+                policy => policy.AllowAnyOrigin()AllowAnyHeader()AllowAnyMethod()
             );
         });
     }
