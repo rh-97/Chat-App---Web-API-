@@ -11,7 +11,7 @@ using Test.Models;
 
 namespace Test.Services;
 
-public class TokenService
+public class TokenService : ITokenService
 {
     private readonly IMongoCollection<User> _usersCollection;
     private readonly IMongoCollection<Token> _tokensCollection;

@@ -8,11 +8,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.ConfigureCors();
 builder.Services.ConfigureJwtAuthentication(builder.Configuration);
+builder.Services.ConfigureCache(builder.Configuration);
 
 
 builder.Services.Configure<Test.Database.DatabaseSettings>(builder.Configuration.GetSection("DatabaseInfo"));
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton<CacheService>();
 
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

@@ -1,10 +1,12 @@
 ﻿using System.Security.Claims;
+using Test.Models;
 
 namespace Test.Services;
 
 public interface ITokenService
 {
-    string GenerateAccessToken(IEnumerable<Claim> claims);
-    string GenerateRefreshToken();
-    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+    Task<bool> VerifyLogin(UserLogin user);
+    Task<bool> SaveRefreshToken(Token refreshToken);
+    Task<bool> DaleteRefreshToken(string name, string refreshToken);
+    Task<Token> GetToken(string name, string refreshToken);
 }

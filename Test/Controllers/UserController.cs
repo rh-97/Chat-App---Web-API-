@@ -16,15 +16,21 @@ public class UserController : ControllerBase
 {
 
     UserService _userService;
-    TokenService _tokenService;
+    ITokenService _tokenService;
+    ICacheService _cacheService;
     private readonly string _key;
     IMapper _mapper;
-    public UserController (UserService userService, IConfiguration configuration, IMapper mapper, TokenService tokenService)
+    public UserController (UserService userService,
+                           IConfiguration configuration,
+                           IMapper mapper,
+                           TokenService tokenService,
+                           CacheService cacheService)
     {
         _key = configuration.GetSection("JwtKey").ToString();
         _mapper = mapper;
         _userService = userService;
         _tokenService = tokenService;
+        _cacheService = cacheService;
     }
 
 
@@ -107,4 +113,10 @@ public class UserController : ControllerBase
         }
     }
 
+    // Get all active users
+    [HttpGet("[action]")]
+    public async Task<List<string>> GetAllActiveUsers()
+    {
+        return await _cacheService.getAll();
+    }
 }

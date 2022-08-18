@@ -68,6 +68,14 @@
               "target": "Package",
               "version": "[2.16.0, )"
             },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.1, )"
+            },
+            "StackExchange.Redis": {
+              "target": "Package",
+              "version": "[2.6.48, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.2.3, )"

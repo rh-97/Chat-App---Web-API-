@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 
 namespace Test.Extensions;
 
@@ -38,5 +39,13 @@ public static class ServiceExtensions
                 IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes("SuperSecretKey@345"))
             };
         });
+    }
+
+
+    // Configure Redis Cache
+    public static void ConfigureCache(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddSingleton<IConnectionMultiplexer>(x =>
+        ConnectionMultiplexer.Connect(configuration.GetValue<string>("RedisUrl")));
     }
 }
