@@ -47,11 +47,19 @@ namespace Test.Services
                 DateOfBirth = p.DateOfBirth
             });
 
+            
+
             return await _usersCollection.Find(_ => true)
                 .Project(projection)
                 .Skip((pageNumber-1)*itemsPerPage)
                 .Limit(itemsPerPage)
                 .ToListAsync();
+        }
+
+        public async Task<long> getCollectionSize()
+        {
+            var records = _usersCollection.Find(_ => true).CountAsync().Result;
+            return records;
         }
 
 

@@ -13,11 +13,13 @@ public class AuthController : ControllerBase
 {
 
     TokenService _tokenService;
+    CacheService _cacheService;
     private readonly string _key;
-    public AuthController(IConfiguration configuration, TokenService tokenService)
+    public AuthController(IConfiguration configuration, TokenService tokenService, CacheService cacheService)
     {
         _key = configuration.GetSection("JwtKey").ToString();
         _tokenService = tokenService;
+        _cacheService = cacheService;
     }
 
 
@@ -45,6 +47,7 @@ public class AuthController : ControllerBase
                 ExpireDateTime = DateTime.UtcNow.AddMinutes(10)
             });
 
+            await _cacheService.Set<int>("dr-" + user.Name, 1);
 
             return Ok(new TokenPair
             {
@@ -120,6 +123,8 @@ public class AuthController : ControllerBase
         {
             return NotFound("Invalid token.");
         }
+
+        _cacheService.Delete("dr-" + username);
 
         return Ok("Successfully logged out.");
 

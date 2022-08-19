@@ -43,7 +43,13 @@ public class UserController : ControllerBase
         return Ok(users);
     }
 
-
+    // GET: api/<UserController>
+    [HttpGet("[action]")]
+    public async Task<ActionResult<Object>> GetCollectionSize()
+    {
+        var totalRecords = await _userService.getCollectionSize();
+        return Ok(new { count = totalRecords });
+    }
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]

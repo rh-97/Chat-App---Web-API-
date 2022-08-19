@@ -30,9 +30,9 @@ public class CacheService : ICacheService
         await db.StringSetAsync(key, JsonConvert.SerializeObject(value), TimeSpan.FromMinutes(1));
     }
 
-    //public async Task ResetExpireTime(string key)
-    //{
-    //    IDatabase db = _connectionMultiplexer.GetDatabase();
-    //    await db.
-    //}
+    public async Task Delete(string key)
+    {
+        IDatabase db = _connectionMultiplexer.GetDatabase();
+        await db.KeyDeleteAsync(key);
+    }
 }
