@@ -1,4 +1,4 @@
-# Chat-App---Web-API-
+# Chat-App-Web-API
 
 ## This is a REST API for a chatting app.
 ## Components:
