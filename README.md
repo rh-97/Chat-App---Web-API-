@@ -7,4 +7,4 @@
   - MongoDB
   - Redis Cache
   - RabbitMQ
-  - SignalIR
+  - SignalR
